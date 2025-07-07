@@ -15,9 +15,9 @@ func CalendarRoutes(app *fiber.App) {
 
 	calendar.Post("/get_events", controllers.GetEvents)
 
-	calendar.Post("/create_event", controllers.CreateEvent)
+	calendar.Post("/create", controllers.CreateEvent)
 
-	calendar.Post("/update_event/:event_id", controllers.UpdateEvent)
+	calendar.Post("/update", controllers.UpdateEvent)
 
-	calendar.Post("/delete_event/:event_id", controllers.DeleteEvent)
+	calendar.Post("/delete/", controllers.DeleteEvent)
 }

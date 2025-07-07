@@ -90,7 +90,7 @@ func CreateEvent(c *fiber.Ctx) error {
 		})
 	}
 
-	err := services.CreateCalendarEvent(event.Token, event.Event)
+	created, err := services.CreateCalendarEvent(event.Token, &event.Event)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"details": err.Error(),
@@ -98,18 +98,11 @@ func CreateEvent(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"detail": "Evento creado con exito",
+		"event": created,
 	})
 }
 
 func UpdateEvent(c *fiber.Ctx) error {
-	eventId := c.Params("event_id")
-	if eventId == "" {
-		return c.Status(400).JSON(fiber.Map{
-			"details": "event_id es requerido",
-		})
-	}
-
 	var event models.UpdateEvent
 	if err := c.BodyParser(&event); err != nil {
 		return c.Status(400).JSON(fiber.Map{
@@ -122,7 +115,7 @@ func UpdateEvent(c *fiber.Ctx) error {
 		})
 	}
 
-	err := services.UpdateCalendarEvent(event.Token, event.Event, eventId)
+	updated, err := services.UpdateCalendarEvent(event.Token, &event.Event)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"details": err.Error(),
@@ -130,26 +123,24 @@ func UpdateEvent(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"detail": "Evento actualizado con exito",
+		"updated": updated,
 	})
 }
 
 func DeleteEvent(c *fiber.Ctx) error {
-	eventId := c.Params("event_id")
-	if eventId == "" {
+	var event models.DeleteEvent
+	if err := c.BodyParser(&event); err != nil {
 		return c.Status(400).JSON(fiber.Map{
-			"details": "event_id es requerido",
+			"details": err.Error(),
 		})
 	}
-
-	var token oauth2.Token
-	if err := c.BodyParser(&token); err != nil {
+	if err := event.Validate(); err != nil {
 		return c.Status(400).JSON(fiber.Map{
 			"details": err.Error(),
 		})
 	}
 
-	err := services.DeleteCalendarEvent(&token, eventId)
+	err := services.DeleteCalendarEvents(event.Token, event.EventIds)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"details": err.Error(),
@@ -157,6 +148,6 @@ func DeleteEvent(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"message": "Evento eliminado",
+		"message": "Evento(s) eliminado(s)",
 	})
 }
